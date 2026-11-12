@@ -1,0 +1,4 @@
+# Milvus dev override — use local filesystem storage instead of MinIO/S3.
+# This eliminates the MinIO dependency for local development.
+common:
+  storageType: local

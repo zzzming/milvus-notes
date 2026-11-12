@@ -1,0 +1,67 @@
+services:
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.14
+    container_name: milvus-etcd
+    environment:
+      - ETCD_AUTO_COMPACTION_MODE=revision
+      - ETCD_AUTO_COMPACTION_RETENTION=1000
+      - ETCD_QUOTA_BACKEND_BYTES=4294967296
+      - ETCD_SNAPSHOT_COUNT=50000
+    command: >
+      etcd
+      --advertise-client-urls=http://etcd:2379
+      --listen-client-urls=http://0.0.0.0:2379
+      --data-dir=/etcd
+    volumes:
+      - etcd_data:/etcd
+    healthcheck:
+      test: ["CMD", "etcdctl", "endpoint", "health"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - milvus
+
+  milvus:
+    image: milvusdb/milvus:v2.4.17
+    container_name: milvus-standalone
+    command: ["milvus", "run", "standalone"]
+    environment:
+      ETCD_ENDPOINTS: etcd:2379
+    ports:
+      - "19530:19530"   # gRPC — clients connect here
+      - "9091:9091"     # HTTP REST API
+    volumes:
+      - milvus_data:/var/lib/milvus
+      - ./configs/milvus.yaml:/milvus/configs/user.yaml  # local storage override
+    depends_on:
+      etcd:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9091/healthz"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - milvus
+
+  attu:
+    image: zilliz/attu:v2.4.9
+    container_name: milvus-attu
+    environment:
+      MILVUS_URL: milvus:19530
+    ports:
+      - "8000:3000"   # Open http://localhost:8000 in browser
+    depends_on:
+      milvus:
+        condition: service_healthy
+    networks:
+      - milvus
+
+volumes:
+  etcd_data:
+  milvus_data:
+
+networks:
+  milvus:
+    driver: bridge

@@ -1,0 +1,8 @@
+[project]
+name = "milvus-clients"
+version = "0.1.0"
+requires-python = ">=3.9"
+dependencies = [
+    "pymilvus>=2.4.0",
+    "sentence-transformers>=2.7.0",
+]
