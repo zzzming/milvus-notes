@@ -2,24 +2,6 @@
 
 A local Milvus development environment with sample clients for vector ingestion and retrieval.
 
-## Repository Structure
-
-```
-milvus-notes/
-├── docker/                  # Docker Compose setup (local dev)
-│   ├── docker-compose.yml
-│   └── configs/
-│       └── milvus.yaml      # local filesystem storage override (no MinIO)
-├── kubernetes/              # Helm / kind setup (coming soon)
-└── clients/
-    └── python/
-        ├── basic_demo.py    # smoke test: random vectors, full lifecycle
-        ├── text_search.py   # semantic search with sentence-transformers
-        └── pyproject.toml
-```
-
-## Docker Setup
-
 ### Prerequisites
 
 - [Podman](https://podman.io/) (or Docker)
